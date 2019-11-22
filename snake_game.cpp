@@ -2,6 +2,7 @@
 //#include<windows.h>
 using namespace std;
 
+
 int mapx = 40; //map width
 int mapy = 20; //map height
 
