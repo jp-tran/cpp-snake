@@ -67,7 +67,7 @@ void printEntity(int length, int pos[2], int screen[2]){
 }
 // Create a map
 void makeMap(){
-	system("clear");
+	wrefresh(stdscr);
 	//create walls
 	for (int i = 0; i <= mapy+1; ++i){
 		for (int j = 0; j <= mapx +1; ++j){
