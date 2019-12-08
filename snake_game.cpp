@@ -1,5 +1,5 @@
 #include<iostream>
-//#include<windows.h>
+#include<ncurses.h>
 using namespace std;
 
 
@@ -17,7 +17,8 @@ int main(){
 
 // Create a map
 void makeMap(){
-	//system("cls");
+	wrefresh(stdscr);
+	//system("clear"); //clear terminal (on Linux)
 	//create walls
 	for (int i = 0; i <= mapy+1; ++i){
 		for (int j = 0; j <= mapx +1; ++j){
