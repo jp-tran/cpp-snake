@@ -3,11 +3,13 @@
 #include<curses.h>
 #include<unistd.h> 
 #include<time.h>
+#include<string>
 #include<deque>
+
 
 using namespace std;
 
-void makeMap(int[]);
+void makeMap(int[], int length);
 int* spawnFood(int[]);
 void move();
 int printEntity(deque <int>, deque <int>, int[]); 
@@ -34,7 +36,7 @@ int main(){
 	ypos.push_back(screen[0]/2); 
 	direction = 1;
 	// print initial entity, map, and food
-	makeMap(screen);
+	makeMap(screen, 1);
 	printEntity(xpos,ypos,screen);
 	int* foodPos = spawnFood(screen); //get location of food
 	mvaddch(foodPos[0], foodPos[1], 'O');
@@ -50,6 +52,12 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 	while(ch != 101) {
 		usleep(500000); // sleep for .5 seconds 
 		ch = getch();
+		if(xpos.size() == ypos.size() && xpos.size() > 1) {
+			for(int i = xpos.size(); i > 1; i--) { 
+				xpos[i] = xpos[i-1]; 
+				ypos[i] = ypos[i-1]; 
+			}
+		}
 		switch(ch)  
 		{
 			case 119:  // w (up)
@@ -88,20 +96,29 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 				break; 
 		} 
 		clear();	
-		makeMap(screen);
+		makeMap(screen, xpos.size());
 		if(printEntity(xpos, ypos, screen) != 1){} 
 		else if(printEntity(xpos, ypos, screen) == 1) {
 			return; 
 		}
-		mvaddch(foodPos[0], foodPos[1], 'O');
+		if(xpos[0] == foodPos[1] && ypos[0] == foodPos[0]) {
+				xpos.push_back(xpos[0]); 
+				ypos.push_back(ypos[0]); 
+		}
+		else {
+			mvaddch(foodPos[0], foodPos[1], 'O');
+		}
 		refresh; 
 	}
 }
 int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){ 
 	if ((ypos[0] > 0)&&(ypos[0] < screen[0])&&(xpos[0] > 0)&&(xpos[0] < screen[1])) {
-		//clear();
-		mvaddch(ypos[0], xpos[0], 'x');
-		//refresh; 
+		mvaddch(ypos[0], xpos[0], '#');
+		if(xpos.size() == ypos.size() && xpos.size() > 1) {
+			for(int i = 1; i < xpos.size(); i--) { 
+				mvaddch(ypos[i], xpos[i], 'x');
+			}
+		}
 		return 0;   
 	}
 	else {
@@ -109,7 +126,7 @@ int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){
 	} 			
 }
 // Create a map
-void makeMap(int screen[2]){
+void makeMap(int screen[2], int length){
 	//create walls
 	for (int i = 0; i <= screen[0]+1; ++i){
 		for (int j = 0; j <= screen[1]+1; ++j){
@@ -126,6 +143,13 @@ void makeMap(int screen[2]){
 			}
 		}
 	}
+	for (int j = 0; j <=screen[1]+1; ++j) {
+		mvaddch(screen[0]+1, j, '-'); 
+	} 
+	mvaddch(screen[0], 1, '|'); 
+	mvaddch(screen[0], screen[1], '|'); 
+	mvaddstr(screen[0], 6, "Length: "); 
+	mvaddstr(screen[0], 14, "14"); 
 }
 
 // Creates a new food and returns its location
