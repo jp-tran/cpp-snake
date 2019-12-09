@@ -53,7 +53,7 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 		usleep(500000); // sleep for .5 seconds 
 		ch = getch();
 		if(xpos.size() == ypos.size() && xpos.size() > 1) {
-			for(int i = xpos.size(); i > 1; i--) { 
+			for(int i = xpos.size()-1; i > 0; i--) { 
 				xpos[i] = xpos[i-1]; 
 				ypos[i] = ypos[i-1]; 
 			}
@@ -104,6 +104,7 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 		if(xpos[0] == foodPos[1] && ypos[0] == foodPos[0]) {
 				xpos.push_back(xpos[0]); 
 				ypos.push_back(ypos[0]); 
+				foodPos = spawnFood(screen); 
 		}
 		else {
 			mvaddch(foodPos[0], foodPos[1], 'O');
@@ -115,7 +116,7 @@ int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){
 	if ((ypos[0] > 0)&&(ypos[0] < screen[0])&&(xpos[0] > 0)&&(xpos[0] < screen[1])) {
 		mvaddch(ypos[0], xpos[0], '#');
 		if(xpos.size() == ypos.size() && xpos.size() > 1) {
-			for(int i = 1; i < xpos.size(); i--) { 
+			for(int i = 1; i < xpos.size(); i++) { 
 				mvaddch(ypos[i], xpos[i], 'x');
 			}
 		}
@@ -144,12 +145,12 @@ void makeMap(int screen[2], int length){
 		}
 	}
 	for (int j = 0; j <=screen[1]+1; ++j) {
-		mvaddch(screen[0]+1, j, '-'); 
+		mvaddch(screen[0]+2, j, '-'); 
 	} 
-	mvaddch(screen[0], 1, '|'); 
-	mvaddch(screen[0], screen[1], '|'); 
-	mvaddstr(screen[0], 6, "Length: "); 
-	mvaddstr(screen[0], 14, "14"); 
+	mvaddch(screen[0]+1, 0, '|'); 
+	mvaddch(screen[0]+1, screen[1]+1, '|'); 
+	mvaddstr(screen[0]+1, 6, "Length: "); 
+	mvaddstr(screen[0]+1, 14, to_string(length).c_str()); 
 }
 
 // Creates a new food and returns its location
