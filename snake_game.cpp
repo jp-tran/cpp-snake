@@ -9,13 +9,14 @@ using namespace std;
 void makeMap(int[]);
 int* spawnFood(int[]);
 void move();
-void printEntity(int, int[], int[]); 
+int printEntity(int, int[], int[]); 
 void entityControl(int[], int[], int[]); 
 int main(){	
 	initscr();
 	cbreak(); 	
 	noecho(); 
-	clear(); 
+	clear();
+	nodelay(stdscr, TRUE);  
 	curs_set(0); 
 	int pos[3], screen[2];
 	// array containing [0] = # of lines [1] = # of cols 
@@ -44,7 +45,7 @@ int main(){
 void entityControl(int pos[3], int screen[2], int foodPos[2]) { 
 	int ch = getch(); 
 	while(ch != 101) {
-		usleep(500000); // sleep for .5 seconds 
+		usleep(1000000); // sleep for .5 seconds 
 		ch = getch();  
 		if (ch == 119) { // w (up)
 		pos[2] = 3; 
@@ -77,18 +78,24 @@ void entityControl(int pos[3], int screen[2], int foodPos[2]) {
 		} 
 		clear();	
 		makeMap(screen);
-		printEntity(1, pos, screen);
+		if(printEntity(1, pos, screen) != 1){} 
+		else if(printEntity(1, pos, screen) == 1) {
+			return; 
+		}
 		mvaddch(foodPos[0], foodPos[1], 'O');
 		refresh; 
 	}
 }
-void printEntity(int length, int pos[3], int screen[2]){ 
+int printEntity(int length, int pos[3], int screen[2]){ 
 	if ((pos[0] > 0)&&(pos[0] < screen[0])&&(pos[1] > 0)&&(pos[1] < screen[1])) {
 		//clear();
 		mvaddch(pos[0], pos[1], 'x');
-		//refresh;   
-	} 
-	 			
+		//refresh; 
+		return 0;   
+	}
+	else {
+		return 1; 
+	} 			
 }
 // Create a map
 void makeMap(int screen[2]){
