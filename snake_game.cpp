@@ -3,14 +3,15 @@
 #include<curses.h>
 #include<unistd.h> 
 #include<time.h>
+#include<deque>
 
 using namespace std;
 
 void makeMap(int[]);
 int* spawnFood(int[]);
 void move();
-int printEntity(int, int[], int[]); 
-void entityControl(int[], int[], int[]); 
+int printEntity(deque <int>, deque <int>, int[]); 
+void entityControl(deque <int>, deque <int>, int,  int[], int[]); 
 int main(){	
 	initscr();
 	cbreak(); 	
@@ -18,78 +19,88 @@ int main(){
 	clear();
 	nodelay(stdscr, TRUE);  
 	curs_set(0); 
-	int pos[3], screen[2];
+	int direction, screen[2];
+	deque <int> xpos; 
+	deque <int> ypos; 
 	// array containing [0] = # of lines [1] = # of cols 
 	screen[0] = LINES - 40; 
 	screen[1] = COLS - 70; 
-	// array containing [y pos, xpos, directoion], where 
+	// 2 deques and 1 int defined,  containing xpos, y pos, and direction where 
 	// direction = 1 - facing right 
 	// direction = 2 - facing left 
 	// direction = 3 - facing up 
 	// direction = 4 - facing down
-	pos[0] = screen[0] / 2; 
-	pos[1] = screen[1] /2; 
-	pos[2] = 1; 
+	xpos.push_back(screen[1]/2); 
+	ypos.push_back(screen[0]/2); 
+	direction = 1;
 	// print initial entity, map, and food
 	makeMap(screen);
-	printEntity(1, pos, screen);
+	printEntity(xpos,ypos,screen);
 	int* foodPos = spawnFood(screen); //get location of food
 	mvaddch(foodPos[0], foodPos[1], 'O');
 	refresh;
-	entityControl(pos, screen, foodPos);  
+	entityControl(xpos, ypos, direction, screen, foodPos);  
 	endwin(); 
 
-	return 0;
+	
 }
 
-void entityControl(int pos[3], int screen[2], int foodPos[2]) { 
+void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen[2], int foodPos[2]) { 
 	int ch = getch(); 
 	while(ch != 101) {
-		usleep(1000000); // sleep for .5 seconds 
-		ch = getch();  
-		if (ch == 119) { // w (up)
-		pos[2] = 3; 
-		} 
-		else if (ch == 97) { // a (left)
-		pos[2] = 2;   
+		usleep(500000); // sleep for .5 seconds 
+		ch = getch();
+		switch(ch)  
+		{
+			case 119:  // w (up)
+				direction = 3; 
+				break;
+		
+			case 97:  // a (left)
+				direction = 2; 
+				break;  
+		
+			case 115:  // s (down) 
+				direction = 4;
+				break;    
+		
+			case 100:  // d (right) 
+				direction = 1;
+				break; 
+			default: 
+				break;  
 		}
-		else if (ch == 115) { // s (down) 
-		pos[2] = 4;   
-		} 
-		else if (ch == 100) { // d (right) 
-		pos[2] = 1; 
-		}
-		switch (pos[2]) 	
+		switch (direction) 	
 		{ 
 			case 1: 
-				pos[1] = pos[1] + 1;
+				xpos[0] = xpos[0] + 1;
 				break; 
 			case 2: 
-				pos[1] = pos[1] - 1;
+				xpos[0] = xpos[0] - 1;
 				break; 
 			case 3: 
-				pos[0] = pos[0] - 1;
+				ypos[0] = ypos[0] - 1;
 				break; 
 			case 4: 
-				pos[0] = pos[0] + 1;
+				ypos[0] = ypos[0] + 1;
 				break; 
 			default:
 				break; 
 		} 
 		clear();	
 		makeMap(screen);
-		if(printEntity(1, pos, screen) != 1){} 
-		else if(printEntity(1, pos, screen) == 1) {
+		if(printEntity(xpos, ypos, screen) != 1){} 
+		else if(printEntity(xpos, ypos, screen) == 1) {
 			return; 
 		}
 		mvaddch(foodPos[0], foodPos[1], 'O');
 		refresh; 
 	}
 }
-int printEntity(int length, int pos[3], int screen[2]){ 
-	if ((pos[0] > 0)&&(pos[0] < screen[0])&&(pos[1] > 0)&&(pos[1] < screen[1])) {
+int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){ 
+	if ((ypos[0] > 0)&&(ypos[0] < screen[0])&&(xpos[0] > 0)&&(xpos[0] < screen[1])) {
 		//clear();
-		mvaddch(pos[0], pos[1], 'x');
+		mvaddch(ypos[0], xpos[0], 'x');
 		//refresh; 
 		return 0;   
 	}
