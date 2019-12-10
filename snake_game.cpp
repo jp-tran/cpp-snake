@@ -185,7 +185,7 @@ void makeMap(int screen[2], int length, int speed){
 int* spawnFood(int screen[2]){
 	static int foodPos[2];
 	srand(time(NULL));
-	foodPos[0] = rand() %screen[0] +1;
-	foodPos[1] = rand() %screen[1] +1;
+	foodPos[0] = (rand() %(screen[0] -1)) + 1;
+	foodPos[1] = (rand() %(screen[1] -1)) + 1;
 	return foodPos;
 };
