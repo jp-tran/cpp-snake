@@ -102,7 +102,7 @@ void mainMenu(){
     int winrow = 10, wincol = 15;
     string title = "MAIN MENU";
     int num_choices = 4;
-    string choices[num_choices] = {"START", "INSTRUCTIONS", "HIGH SCORES", "QUIT"};
+    string choices[4] = {"START", "INSTRUCTIONS", "HIGH SCORES", "QUIT"};
     int choice;
     int startind = 2;
     int highlight = startind + 1;
