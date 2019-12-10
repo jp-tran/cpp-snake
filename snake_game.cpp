@@ -48,17 +48,44 @@ void printMainMenu(int winrow, int wincol, string title){
     };
 };
 
-void printSubMenu(int nrows, int ncols, int yloc, int xloc, string text, string option){
+void printSubMenu(int yloc, int xloc, string text[], int size_text, string option){
     while(1){
-
+        // determine size of window
+        int textwidth = option.length();
+        for (int i = 0; i < size_text; ++i){
+            if (textwidth < text[i].length()){
+                textwidth = text[i].length(); //set textwidth = to length of longest str
+            };
+        };
+        int ncols = textwidth + 6;
+        int nrows = size_text + 5;
         WINDOW * subwin = newwin(nrows, ncols, yloc, xloc);
         box(subwin,ACS_VLINE,ACS_HLINE); //draw lines around window border
-        int yMax, xMax;
-        getmaxyx(subwin, yMax, xMax);
-        int cornerx = (xMax/2) - text.length()/2;
-        mvwprintw(subwin, 1, cornerx,text.c_str());
+
+        //print text to sub-menu window
+        for (int i = 0; i < size_text; ++i){
+            int cornerx = (ncols/2) - text[i].length()/2;
+            mvwprintw(subwin, i+1, cornerx, text[i].c_str());
+        };
+
+        //Draw box around button
+        int cornerx = (ncols/2) - option.length()/2;
+        int startdrw = cornerx -1;
+        int enddrw = cornerx + option.length();
+        for (int i = startdrw; i < enddrw +1; ++i){
+            mvwaddch(subwin, nrows-4, i, ACS_HLINE);
+            mvwaddch(subwin, nrows-2, i, ACS_HLINE);
+        };
+        mvwaddch(subwin, nrows-4, startdrw, ACS_ULCORNER);
+        mvwaddch(subwin, nrows-4, enddrw, ACS_URCORNER);
+        mvwaddch(subwin, nrows-3, startdrw, ACS_VLINE);
+        mvwaddch(subwin, nrows-3, enddrw, ACS_VLINE);
+        mvwaddch(subwin, nrows-2, startdrw, ACS_LLCORNER);
+        mvwaddch(subwin, nrows-2, enddrw, ACS_LRCORNER);
+
+        //print action button (e.g. OK button)
         wattron(subwin,A_REVERSE);
-        mvwprintw(subwin, 3, 9,option.c_str());
+        mvwprintw(subwin, nrows - 3, cornerx, option.c_str());
         refresh();
         wrefresh(subwin);
         int choice = getch();
@@ -66,6 +93,7 @@ void printSubMenu(int nrows, int ncols, int yloc, int xloc, string text, string 
             clear();
             break;
         };
+
     };
 };
 
@@ -114,10 +142,10 @@ void mainMenu(){
                 };
                 //If user selects INSTRUCTIONS
                 if (highlight == 4){
-                    string InstText = "Use WASD to move";
+                    string InstText[1] = "Use WASD to move";
                     string InstOK = "OK";
                     int nrows = 5, ncols = 20;
-                    printSubMenu(nrows, ncols, highlight-1, wincol, InstText, InstOK);
+                    printSubMenu(highlight-1, wincol, InstText, 1, InstOK);
                     printMainMenu(winrow, wincol, title);
                 }
                 break;
@@ -163,10 +191,10 @@ void startGame(){
 	refresh;
 	entityControl(xpos, ypos, direction, screen, foodPos);
 	// Print Game Over Pop Up
-	string goText = "GAME OVER";
-	string goOption = "OK";
+	string goText[1] = "GAME OVER";
+	string goOption = "GO TO MAIN MENU";
 	int nrows = 5, ncols = 20;
-    printSubMenu(nrows, ncols, (screen[0]/2) - (nrows/2), screen[1]/2, goText, goOption);
+    printSubMenu((screen[0]/2) - (nrows/2), screen[1]/2, goText, 1, goOption);
 };
 
 void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen[2], int foodPos[2]) { 
