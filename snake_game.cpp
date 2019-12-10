@@ -11,6 +11,7 @@ using namespace std;
 
 void mainMenu();
 void startGame();
+bool snakeCross(deque <int>, deque <int>);
 void makeMap(int[], int length, int speed);
 int* spawnFood(int[]);
 void move();
@@ -18,7 +19,13 @@ int printEntity(deque <int>, deque <int>, int[]);
 void entityControl(deque <int>, deque <int>, int,  int[], int[]);
 
 int main(){	
+	
 	initscr();
+	// init colors, define them
+	start_color(); 
+	init_pair(1, COLOR_RED, COLOR_BLACK); 
+	init_pair(2, COLOR_GREEN, COLOR_BLACK); 
+	init_pair(3, COLOR_YELLOW, COLOR_BLACK);
 	cbreak(); 	
 	noecho(); 
 	clear();
@@ -149,7 +156,10 @@ void startGame(){
 	makeMap(screen, 1, 1);
 	printEntity(xpos,ypos,screen);
 	int* foodPos = spawnFood(screen); //get location of food
+	//initialize food, set color 
+	attron(COLOR_PAIR(3));
 	mvaddch(foodPos[0], foodPos[1], 'O');
+	attroff(COLOR_PAIR(3)); 
 	refresh;
 	entityControl(xpos, ypos, direction, screen, foodPos);
 	// Print Game Over Pop Up
@@ -239,17 +249,23 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 				foodPos = spawnFood(screen); 
 		}
 		else {
+			attron(COLOR_PAIR(3)); 
 			mvaddch(foodPos[0], foodPos[1], 'O');
+			attroff(COLOR_PAIR(3));
 		}
 		refresh; 
 	}
 }
 int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){ 
-	if ((ypos[0] > 0)&&(ypos[0] < screen[0] + 1)&&(xpos[0] > 0)&&(xpos[0] < screen[1]+1) ) {
+	if ((ypos[0] > 0)&&(ypos[0] < screen[0] + 1)&&(xpos[0] > 0)&&(xpos[0] < screen[1]+1) && !snakeCross(xpos, ypos)) {
+		attron(COLOR_PAIR(1)); 
 		mvaddch(ypos[0], xpos[0], '#');
+		attroff(COLOR_PAIR(1));
 		if(xpos.size() == ypos.size() && xpos.size() > 1) {
 			for(int i = 1; i < xpos.size(); i++) { 
+				attron(COLOR_PAIR(2));
 				mvaddch(ypos[i], xpos[i], 'x');
+				attroff(COLOR_PAIR(2)); 
 			}
 		}
 		return 0;   
@@ -258,6 +274,16 @@ int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){
 		return 1; 
 	} 			
 }
+// snakecross - checks if head is crossing over any part of the snake 
+// returns true if snake is crossing which ends game. otherwise returns false
+bool snakeCross(deque <int> xpos, deque <int> ypos) { 
+	for(int i=1; i<xpos.size(); i++) {
+		if(xpos[0] == xpos[i] && ypos[0] == ypos[i]) { 
+			return true; 
+		} 
+	} 
+	return false;
+} 
 // Create a map
 void makeMap(int screen[2], int length, int speed){
 	//create walls
