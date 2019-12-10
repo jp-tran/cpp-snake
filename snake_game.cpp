@@ -33,7 +33,12 @@ int main(){
 	// direction = 3 - facing up 
 	// direction = 4 - facing down
 	xpos.push_back(screen[1]/2); 
+	ypos.push_back(screen[0]/2);
+	// add two segments 
+	xpos.push_back(screen[1]/2 - 1);
 	ypos.push_back(screen[0]/2); 
+	xpos.push_back(screen[1]/2 -2); 
+	ypos.push_back(screen[0]/2);
 	direction = 1;
 	// print initial entity, map, and food
 	makeMap(screen, 1, 1);
@@ -63,19 +68,27 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 		switch(ch)  
 		{
 			case 119:  // w (up)
-				direction = 3; 
+				if(direction != 4) {
+					direction = 3; 
+				}
 				break;
 		
 			case 97:  // a (left)
-				direction = 2; 
+				if(direction != 1){ 
+					direction = 2; 
+				}
 				break;  
 		
 			case 115:  // s (down) 
-				direction = 4;
+				if(direction !=3) {
+					direction = 4;
+				}
 				break;    
 		
 			case 100:  // d (right) 
-				direction = 1;
+				if(direction != 2) {
+					direction = 1;
+				}
 				break;
 			case 116: // t (increase speed up to max of 10) 
 				if (speed <10){
