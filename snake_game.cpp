@@ -75,7 +75,7 @@ void printSubMenu(int yloc, int xloc, string text[], int size_text, string optio
         for (int i = startdrw; i < enddrw +1; ++i){
             mvwaddch(subwin, nrows-4, i, ACS_HLINE);
             mvwaddch(subwin, nrows-2, i, ACS_HLINE);
-        };
+        }
         mvwaddch(subwin, nrows-4, startdrw, ACS_ULCORNER);
         mvwaddch(subwin, nrows-4, enddrw, ACS_URCORNER);
         mvwaddch(subwin, nrows-3, startdrw, ACS_VLINE);
@@ -92,17 +92,17 @@ void printSubMenu(int yloc, int xloc, string text[], int size_text, string optio
         if (choice == 10){
             clear();
             break;
-        };
+        }
 
-    };
-};
+    }
+}
 
 void mainMenu(){
     // Create a main menu window
     int winrow = 10, wincol = 15;
     string title = "MAIN MENU";
     int num_choices = 4;
-    string choices[num_choices] = {"START", "INSTRUCTIONS", "HIGH SCORES", "QUIT"};
+    string choices[4] = {"START", "INSTRUCTIONS","HIGH SCORES", "QUIT"};
     int choice;
     int startind = 2;
     int highlight = startind + 1;
@@ -139,7 +139,7 @@ void mainMenu(){
                     startGame();
                     clear();
                     printMainMenu(winrow, wincol, title);
-                };
+                }
                 //If user selects INSTRUCTIONS
                 if (highlight == 4){
                     string InstText[1] = "Use WASD to move";
@@ -156,8 +156,8 @@ void mainMenu(){
         if (choice == 10 && highlight == startind+num_choices){
             break;
         }
-    };
-};
+    }
+}
 
 void startGame(){
     clear();
@@ -317,25 +317,32 @@ void makeMap(int screen[2], int length, int speed){
 	//create walls
 	for (int i = 0; i <= screen[0]+1; ++i){
 		for (int j = 0; j <= screen[1]+1; ++j){
-			if (i == 0 || i == screen[0]){
-				mvaddch(i,j,'-');
+			if (i == 0 && j == 0) {  // upper left corner
+				mvaddch(i,j,ACS_ULCORNER); 
+			} 
+			else if (i == 0 && j == screen[0]+1) { // upper right corner
+				mvaddch(i,j,ACS_URCORNER); 
+			}  
+			else if (i == 0 || i == screen[0]){
+				mvaddch(i,j,ACS_HLINE);
 			}
-			else if (i > 0 && i < screen[0]+1){
+			else if (i > 0 && i < screen[0] + 1){
 				if (j == 0 || j == screen[1]+1){
-					mvaddch(i,j,'|');
-				}
-				else {
-					mvaddch(i,j,' ');
+					mvaddch(i,j,ACS_VLINE);
 				}
 			}
 		}
 	}
-	for (int j = 0; j <=screen[1]+1; ++j) {
-		mvaddch(screen[0]+2, j, '-'); 
+	
+	for (int j = 1; j <=screen[1]; ++j) {
+		mvaddch(screen[0]+2, j, ACS_HLINE); 
 	} 
+	
+	mvaddch(screen[0]+2, 0, ACS_LTEE); 
+	mvaddch(screen[0]+2, 0, ACS_RTEE); 
 	// add gui on bottom
-	mvaddch(screen[0]+1, 0, '|'); 
-	mvaddch(screen[0]+1, screen[1]+1, '|'); 
+	mvaddch(screen[0]+1, 0, ACS_VLINE); 
+	mvaddch(screen[0]+1, screen[1]+1, ACS_VLINE); 
 	mvaddstr(screen[0]+1, screen[1]/4, "Length: "); 
 	mvaddstr(screen[0]+1, screen[1]/4 + 8, to_string(length).c_str());
 	mvaddstr(screen[0]+1, screen[1]*3/4, "Speed: "); 
