@@ -102,11 +102,7 @@ void mainMenu(){
     int winrow = 10, wincol = 15;
     string title = "MAIN MENU";
     int num_choices = 4;
-<<<<<<< HEAD
-    string choices[4] = {"START", "INSTRUCTIONS","HIGH SCORES", "QUIT"};
-=======
     string choices[4] = {"START", "INSTRUCTIONS", "HIGH SCORES", "QUIT"};
->>>>>>> 69d44605e9f4bc249e669843591ffb0acc8d7ccb
     int choice;
     int startind = 2;
     int highlight = startind + 1;
@@ -146,7 +142,7 @@ void mainMenu(){
                 }
                 //If user selects INSTRUCTIONS
                 if (highlight == 4){
-                    string InstText[1] = "Use WASD to move";
+                    string InstText[1] = "Use arrow keys to move";
                     string InstOK = "OK";
                     int nrows = 5, ncols = 20;
                     printSubMenu(highlight-1, wincol, InstText, 1, InstOK);
@@ -169,8 +165,8 @@ void startGame(){
 	deque <int> xpos;
 	deque <int> ypos;
 	// array containing [0] = # of lines [1] = # of cols
-	screen[0] = LINES - 40;
-	screen[1] = COLS - 70;
+	screen[0] = LINES /2;
+	screen[1] = COLS /2;
 	// 2 deques and 1 int defined,  containing xpos, y pos, and direction where
 	// direction = 1 - facing right
 	// direction = 2 - facing left
@@ -185,7 +181,7 @@ void startGame(){
 	ypos.push_back(screen[0]/2);
 	direction = 1;
 	// print initial entity, map, and food
-	makeMap(screen, 1, 1);
+	makeMap(screen, 3, 1);
 	printEntity(xpos,ypos,screen);
 	int* foodPos = spawnFood(screen); //get location of food
 	//initialize food, set color 
@@ -202,6 +198,7 @@ void startGame(){
 };
 
 void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen[2], int foodPos[2]) { 
+	keypad(stdscr, true); // get arrow keys
 	int ch = getch(); 
 	int speed = 1; 
 	double initial_time = 1000000; 
@@ -216,35 +213,35 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 		}
 		switch(ch)  
 		{
-			case 119:  // w (up)
+			case KEY_UP:  // w (up)
 				if(direction != 4) {
 					direction = 3; 
 				}
 				break;
 		
-			case 97:  // a (left)
+			case KEY_LEFT:  // a (left)
 				if(direction != 1){ 
 					direction = 2; 
 				}
 				break;  
 		
-			case 115:  // s (down) 
+			case KEY_DOWN:  // s (down) 
 				if(direction !=3) {
 					direction = 4;
 				}
 				break;    
 		
-			case 100:  // d (right) 
+			case KEY_RIGHT:  // d (right) 
 				if(direction != 2) {
 					direction = 1;
 				}
 				break;
-			case 116: // t (increase speed up to max of 10) 
+			case 102: // t (increase speed up to max of 10) 
 				if (speed <10){
 				speed = speed + 1;
 				} 
 				break;  
-			case 103: // g (decrease speed up to min of 1) 
+			case 115: // g (decrease speed up to min of 1) 
 				if (speed > 1) { 
 				speed = speed - 1; 
 				} 
@@ -289,7 +286,7 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 	}
 }
 int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){ 
-	if ((ypos[0] > 0)&&(ypos[0] < screen[0] + 1)&&(xpos[0] > 0)&&(xpos[0] < screen[1]+1) && !snakeCross(xpos, ypos)) {
+	if ((ypos[0] >= 0)&&(ypos[0] < screen[0] + 1)&&(xpos[0] >= 0)&&(xpos[0] < screen[1]+1) && !snakeCross(xpos, ypos)) {
 		attron(COLOR_PAIR(1)); 
 		mvaddch(ypos[0], xpos[0], '#');
 		attroff(COLOR_PAIR(1));
@@ -324,11 +321,12 @@ void makeMap(int screen[2], int length, int speed){
 			if (i == 0 && j == 0) {  // upper left corner
 				mvaddch(i,j,ACS_ULCORNER); 
 			} 
-			else if (i == 0 && j == screen[0]+1) { // upper right corner
+			else if (i == 0 && j == screen[1]+1) { // upper right corner
 				mvaddch(i,j,ACS_URCORNER); 
 			}  
 			else if (i == 0 || i == screen[0]){
 				mvaddch(i,j,ACS_HLINE);
+				
 			}
 			else if (i > 0 && i < screen[0] + 1){
 				if (j == 0 || j == screen[1]+1){
@@ -342,8 +340,10 @@ void makeMap(int screen[2], int length, int speed){
 		mvaddch(screen[0]+2, j, ACS_HLINE); 
 	} 
 	
-	mvaddch(screen[0]+2, 0, ACS_LTEE); 
-	mvaddch(screen[0]+2, 0, ACS_RTEE); 
+	mvaddch(screen[0], 0, ACS_LTEE); 
+	mvaddch(screen[0], screen[1]+1, ACS_RTEE); 
+	mvaddch(screen[0]+2,0,ACS_LLCORNER); 
+	mvaddch(screen[0]+2,screen[1]+1, ACS_LRCORNER);
 	// add gui on bottom
 	mvaddch(screen[0]+1, 0, ACS_VLINE); 
 	mvaddch(screen[0]+1, screen[1]+1, ACS_VLINE); 
