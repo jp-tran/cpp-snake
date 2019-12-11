@@ -260,15 +260,15 @@ void mainMenu(){
                     for (int i = 1; i < 4; ++i){ //pad strings with spaces
                         if (scorelen > highscores[i-1].second.length()){
                             string tempscore = highscores[i-1].second;
-                            for (int i = 0; i < scorelen -highscores[i-1].second.length(); ++i){
-                                tempscore = tempscore + " ";
+                            for (int j = 0; j < scorelen -highscores[i-1].second.length(); ++j){
+                                tempscore = " " + tempscore;
                             }
                             highscores[i-1].second = tempscore;
                         }
                         if (namelen > highscores[i-1].first.length()){
                             string tempstr = highscores[i-1].first;
-                            for (int i = 0; i < namelen -highscores[i-1].first.length(); ++i){
-                                tempstr = " " + tempstr;
+                            for (int j = 0; j < namelen -highscores[i-1].first.length(); ++j){
+                                tempstr = tempstr + " ";
                             }
                             highscores[i-1].first = tempstr;
                         }
