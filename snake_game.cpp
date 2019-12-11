@@ -286,7 +286,7 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 	}
 }
 int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){ 
-	if ((ypos[0] >= 0)&&(ypos[0] < screen[0] + 1)&&(xpos[0] >= 0)&&(xpos[0] < screen[1]+1) && !snakeCross(xpos, ypos)) {
+	if ((ypos[0] > 0)&&(ypos[0] < screen[0] + 1)&&(xpos[0] > 0)&&(xpos[0] < screen[1]+1) && !snakeCross(xpos, ypos)) {
 		attron(COLOR_PAIR(1)); 
 		mvaddch(ypos[0], xpos[0], '#');
 		attroff(COLOR_PAIR(1));
