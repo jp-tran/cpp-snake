@@ -5,18 +5,20 @@
 #include<time.h>
 #include<string>
 #include<deque>
-
+#include <fstream> //for reading and writing to files
+#include <vector>
+#include <sstream>
 
 using namespace std;
 
 void mainMenu();
-void startGame();
+int startGame();
 bool snakeCross(deque <int>, deque <int>);
 void makeMap(int[], int length, int speed);
 int* spawnFood(int[]);
 void move();
 int printEntity(deque <int>, deque <int>, int[]); 
-void entityControl(deque <int>, deque <int>, int,  int[], int[]);
+int entityControl(deque <int>, deque <int>, int,  int[], int[]);
 
 int main(){	
 	
@@ -35,6 +37,81 @@ int main(){
 	endwin(); 
 
 	
+};
+
+//function to read in files
+vector< pair<string, string> > read_from_csv(string filename){
+    vector< pair<string, string> > highscores;
+    // Create an input filestream
+    ifstream myFile(filename);
+    if (!myFile.is_open()){
+        cout << "Cannot Find File " << filename << endl;
+        exit(1);
+    }
+
+    // Helper vars
+    string line, val, tempName, tempScore;
+    int row = 0, col;
+
+    // Read the column names
+    while(getline(myFile, line)){
+
+        // Create a stringstream from line
+        stringstream ss(line);
+        col = 0;
+        // Extract each column name
+        while(ss >> val){
+            if (col == 0){
+                tempName = val;};
+            if (col == 1){
+                tempScore = val;};
+            ++col;
+        };
+        highscores.push_back(make_pair(tempName, tempScore));
+        ++row;
+    };
+    return highscores;
+};
+
+//function to write to files
+void write_to_csv(string filename, vector< pair<string, string> > highscores){
+    // Create an output filestream object
+    std::ofstream myFile(filename);
+
+    // Send data to the stream
+    for(int i = 0; i < highscores.size(); ++i)
+    {
+        for(int j = 0; j < 2; ++j){
+            if (j == 0) {myFile << highscores[i].first;};
+            if (j == 1) {myFile << highscores[i].second;};
+            if(j != 1) {myFile << " ";}; // No comma at end of line
+        };
+        if (i != highscores.size()-1) {myFile << "\n";}; //no new line at end of file
+    };
+
+    // Close the file
+    myFile.close();
+};
+
+void update_high_score(string name, int score, string filename){
+    vector< pair<string, string> > highscores = read_from_csv(filename);
+    score = score - 3; //disregard 3 points since snake spawns with 3
+    if (score >= stoi(highscores[0].second)){ //if score >= best score
+        highscores[2] = highscores[1];
+        highscores[1] = highscores[0];
+        highscores[0].first = name;
+        highscores[0].second = to_string(score);
+    }
+    else if (score >= stoi(highscores[1].second)){ //if score >= second best score
+        highscores[2] = highscores[1];
+        highscores[1].first = name;
+        highscores[1].second = to_string(score);
+    }
+    else if (score >= stoi(highscores[2].second)){ //if score >= third best score
+        highscores[2].first = name;
+        highscores[2].second = to_string(score);
+    }
+    write_to_csv(filename, highscores);
 };
 
 void printMainMenu(int winrow, int wincol, string title){
@@ -98,6 +175,7 @@ void printSubMenu(int yloc, int xloc, string text[], int size_text, string optio
 }
 
 void mainMenu(){
+    string filename = "highscores.txt"; //file with highscores
     // Create a main menu window
     int winrow = 10, wincol = 15;
     string title = "MAIN MENU";
@@ -134,12 +212,28 @@ void mainMenu(){
                 }
                 break;
             case 10: // If Enter key is pressed
-                //If user selects Start
+                //If user selects START
                 if (highlight == 3){
-                    startGame();
+                    // Read in high scores and start game
+                    curs_set(1); //makes cursor visible
+                    echo(); //allows auto echoing of characters
+                    string mesg = "Enter name: ";
+                    char input[10];
+                    int row,col;
+                    refresh();
+                    WINDOW * win = newwin(winrow, 30, 0, 0);
+                    refresh();
+                    mvwprintw(win,0,0,mesg.c_str());
+                    wgetnstr(win, input, 10);
+                    wrefresh(win);
+                    string name(input); //convert char to string
+                    curs_set(0);
+                    noecho();
+                    int score = startGame();
+                    update_high_score(name, score, filename);
                     clear();
                     printMainMenu(winrow, wincol, title);
-                }
+                };
                 //If user selects INSTRUCTIONS
                 if (highlight == 4){
                     string InstText[1] = "Use arrow keys to move";
@@ -147,7 +241,43 @@ void mainMenu(){
                     int nrows = 5, ncols = 20;
                     printSubMenu(highlight-1, wincol, InstText, 1, InstOK);
                     printMainMenu(winrow, wincol, title);
-                }
+                };
+                //If user selects HIGH SCORES
+                if (highlight == 5){
+                    string scoreButton = "OK";
+                    vector< pair<string, string> > highscores = read_from_csv(filename);
+                    string scoreArr[4];
+                    scoreArr[0] = "TOP 3 SCORES";
+                    //Determine longest name and score
+                    int namelen = highscores[0].first.length();
+                    int scorelen = highscores[0].second.length();
+                    for (int i = 1; i < 4; ++i){
+                        if (namelen < highscores[i-1].first.length()){
+                            namelen = highscores[i-1].first.length();}
+                        if (scorelen < highscores[i-1].second.length()){
+                            scorelen = highscores[i-1].second.length();}
+                    }
+                    for (int i = 1; i < 4; ++i){ //pad strings with spaces
+                        if (scorelen > highscores[i-1].second.length()){
+                            string tempscore = highscores[i-1].second;
+                            for (int i = 0; i < scorelen -highscores[i-1].second.length(); ++i){
+                                tempscore = tempscore + " ";
+                            }
+                            highscores[i-1].second = tempscore;
+                        }
+                        if (namelen > highscores[i-1].first.length()){
+                            string tempstr = highscores[i-1].first;
+                            for (int i = 0; i < namelen -highscores[i-1].first.length(); ++i){
+                                tempstr = " " + tempstr;
+                            }
+                            highscores[i-1].first = tempstr;
+                        }
+                        scoreArr[i] = highscores[i-1].first + " " + highscores[i-1].second;
+                    }
+                    printSubMenu(0, wincol, scoreArr, 4, scoreButton);
+                    highscores.clear();
+                    printMainMenu(winrow, wincol, title);
+                };
                 break;
             default:
                 break;
@@ -159,7 +289,7 @@ void mainMenu(){
     }
 }
 
-void startGame(){
+int startGame(){
     clear();
     int direction, screen[2];
 	deque <int> xpos;
@@ -189,15 +319,16 @@ void startGame(){
 	mvaddch(foodPos[0], foodPos[1], 'O');
 	attroff(COLOR_PAIR(3)); 
 	refresh;
-	entityControl(xpos, ypos, direction, screen, foodPos);
+	int score = entityControl(xpos, ypos, direction, screen, foodPos);
 	// Print Game Over Pop Up
 	string goText[1] = "GAME OVER";
 	string goOption = "GO TO MAIN MENU";
 	int nrows = 5, ncols = 20;
     printSubMenu((screen[0]/2) - (nrows/2), screen[1]/2, goText, 1, goOption);
+    return score;
 };
 
-void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen[2], int foodPos[2]) { 
+int entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen[2], int foodPos[2]) {
 	keypad(stdscr, true); // get arrow keys
 	int ch = getch(); 
 	int speed = 1; 
@@ -270,7 +401,7 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 		makeMap(screen, xpos.size(), speed);
 		if(printEntity(xpos, ypos, screen) != 1){} 
 		else if(printEntity(xpos, ypos, screen) == 1) {
-			return; 
+			return xpos.size(); //when snake collides with a wall or itself
 		}
 		if(xpos[0] == foodPos[1] && ypos[0] == foodPos[0]) {
 				xpos.push_back(xpos[0]); 
@@ -284,6 +415,7 @@ void entityControl(deque <int> xpos, deque <int> ypos, int direction, int screen
 		}
 		refresh; 
 	}
+	return xpos.size(); //in case user quits prematurely
 }
 int printEntity(deque <int> xpos, deque <int> ypos, int screen[2]){ 
 	if ((ypos[0] > 0)&&(ypos[0] < screen[0] + 1)&&(xpos[0] > 0)&&(xpos[0] < screen[1]+1) && !snakeCross(xpos, ypos)) {
@@ -347,8 +479,8 @@ void makeMap(int screen[2], int length, int speed){
 	// add gui on bottom
 	mvaddch(screen[0]+1, 0, ACS_VLINE); 
 	mvaddch(screen[0]+1, screen[1]+1, ACS_VLINE); 
-	mvaddstr(screen[0]+1, screen[1]/4, "Length: "); 
-	mvaddstr(screen[0]+1, screen[1]/4 + 8, to_string(length).c_str());
+	mvaddstr(screen[0]+1, screen[1]/4, "Score: ");
+	mvaddstr(screen[0]+1, screen[1]/4 + 8, to_string(length-3).c_str());
 	mvaddstr(screen[0]+1, screen[1]*3/4, "Speed: "); 
 	mvaddstr(screen[0]+1, screen[1]*3/4 + 8, to_string(speed).c_str()); 
 }
