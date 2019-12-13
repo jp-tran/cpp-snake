@@ -321,10 +321,12 @@ int startGame(){
 	refresh;
 	int score = entityControl(xpos, ypos, direction, screen, foodPos);
 	// Print Game Over Pop Up
-	string goText[1] = "GAME OVER";
+	string goText[2];
+	goText[0] = "GAME OVER";
+	goText[1] = "Your score: " + to_string(score-3);
 	string goOption = "GO TO MAIN MENU";
 	int nrows = 5, ncols = 20;
-    printSubMenu((screen[0]/2) - (nrows/2), screen[1]/2, goText, 1, goOption);
+    printSubMenu((screen[0]/2) - (nrows/2), screen[1]/2, goText, 2, goOption);
     return score;
 };
 
