@@ -236,10 +236,12 @@ void mainMenu(){
                 };
                 //If user selects INSTRUCTIONS
                 if (highlight == 4){
-                    string InstText[1] = "Use arrow keys to move";
+                    string InstText[2];
+                    InstText[0] = "Use arrow keys to move";
+                    InstText[1] = "Press s/f to go slower/faster";
                     string InstOK = "OK";
                     int nrows = 5, ncols = 20;
-                    printSubMenu(highlight-1, wincol, InstText, 1, InstOK);
+                    printSubMenu(highlight-1, wincol, InstText, 2, InstOK);
                     printMainMenu(winrow, wincol, title);
                 };
                 //If user selects HIGH SCORES
